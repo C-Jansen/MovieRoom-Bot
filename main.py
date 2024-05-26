@@ -1,31 +1,36 @@
 import os
 import json
 import requests
+import sqlite3
+import asyncio
+from PIL import Image
+from io import BytesIO
+from datetime import datetime
+from dotenv import load_dotenv
+
 import discord
 from discord.ext import commands
 from discord import app_commands
-import sqlite3
-from datetime import datetime
-from dotenv import load_dotenv
-from search import getMovies
-import asyncio
 from discord.ui import Button, View
-from makeRoom import make_room
-from PIL import Image
-import requests
-from io import BytesIO
 
-# Load environment variables from .env file
+from search import getMovies
+from makeRoom import make_room
+
+
+
+
+
 load_dotenv('envBot.env')
+
 DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
 W2G_API_KEY = os.getenv('W2G_API_KEY')
 
-# Initialize the database connection
+
 conn = sqlite3.connect('movies.db')
 c = conn.cursor()
 c.execute('''DROP TABLE IF EXISTS movies''')
 
-# Create a table if it doesn't exist
+
 c.execute('''CREATE TABLE IF NOT EXISTS movies (
                 guild_id TEXT NOT NULL,
                 user_id TEXT,
@@ -59,7 +64,7 @@ async def add_movie(interaction: discord.Interaction, movie_name: str):
     user_id = str(interaction.user.id)
     date_added = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    guild_id = str(interaction.guild.id)  # Add interaction before guild
+    guild_id = str(interaction.guild.id)  
     c.execute("INSERT INTO movies (guild_id, user_id, movie_name, date_added) VALUES (?, ?, ?, ?)", (guild_id, user_id, movie_name, date_added))  # Add guild_id parameter
     conn.commit()
     embed = discord.Embed(title="Movie Added", description=f'"{movie_name}" has been added to your plan to watch list!', color=discord.Color.blue())

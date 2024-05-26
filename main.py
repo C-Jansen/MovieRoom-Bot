@@ -3,6 +3,7 @@ import json
 import requests
 import sqlite3
 import asyncio
+
 from PIL import Image
 from io import BytesIO
 from datetime import datetime
@@ -17,18 +18,13 @@ from search import getMovies
 from makeRoom import make_room
 
 
-
-
-
 load_dotenv('envBot.env')
-
 DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
 W2G_API_KEY = os.getenv('W2G_API_KEY')
 
 
 conn = sqlite3.connect('movies.db')
 c = conn.cursor()
-c.execute('''DROP TABLE IF EXISTS movies''')
 
 
 c.execute('''CREATE TABLE IF NOT EXISTS movies (
@@ -57,7 +53,15 @@ class MyBot(discord.Client):
 
 bot = MyBot()
 
-
+@bot.tree.command(name='help', description='Show the help message' )
+async def help(interaction: discord.Interaction):
+    embed = discord.Embed(title="Help", description="Here are the available commands:", color=discord.Color.green())
+    embed.add_field(name="/addmovie", value="Add a movie to your plan to watch list", inline=False)
+    embed.add_field(name="/deletemovie", value="Delete a movie from your plan to watch list", inline=False)
+    embed.add_field(name="/clearmovies", value="Clear your plan to watch list", inline=False)
+    embed.add_field(name="/listmovies", value="List all movies in your plan to watch list", inline=False)
+    embed.add_field(name="/search", value="Search for movies & Make Watch2gether room", inline=False)
+    await interaction.response.send_message(embed=embed)
 
 @bot.tree.command(name='addmovie', description='Add a movie to your plan to watch list')
 async def add_movie(interaction: discord.Interaction, movie_name: str):
@@ -140,24 +144,25 @@ async def search(interaction: discord.Interaction, query:str):
     try:
         user_id = str(interaction.user.id)
         results = getMovies(query)
+        await interaction.response.defer(ephemeral=True)
+        
         images = [Image.open(BytesIO(requests.get(movie['cover']).content)) for movie in results]
         combined_image = MovieView.combine_images(images)
         view = discord.ui.View()
-        await interaction.response.send_message("Searching movies...", ephemeral=True)
-        
+
         with BytesIO() as image_binary:
             combined_image.save(image_binary, "JPEG")
             image_binary.seek(0)
-            file = discord.File(fp=image_binary, filename='combined_image.jpg')
-         
+            file=discord.File(fp=image_binary, filename='combined_image.jpg')
+       
         for result in results:
-            view.add_item(discord.ui.Button(label='Go to ' + result['title'], url=make_room(result['link'])))
+            view.add_item(discord.ui.Button(label= result['title'], url=make_room(result['link'])))
+            
         await interaction.followup.send(file=file, view=view)
         
         print(f'search from {user_id}')
     except Exception as e:
         print(f'Error in search command: {e}')
-
 
 if DISCORD_TOKEN:
     bot.run(DISCORD_TOKEN)

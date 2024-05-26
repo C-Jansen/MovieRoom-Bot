@@ -2,7 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 
 
-postlimit = 6
+postlimit = 5
 def getMovies(query):
     moviesDictionary = {
         'success': True,
@@ -59,45 +59,45 @@ def getMovies(query):
         except Exception as e:
             type = str(e)
 
-        try:
-            if(type == 'MOVIE'):
-                rawData = item.find('div', class_='meta').text
-                listData = rawData.split()
-                year = listData[0]
-            else:
-                year = 'N/A'
-        except Exception as e:
-            year = str(e)
+        # try:
+        #     if(type == 'MOVIE'):
+        #         rawData = item.find('div', class_='meta').text
+        #         listData = rawData.split()
+        #         year = listData[0]
+        #     else:
+        #         year = 'N/A'
+        # except Exception as e:
+        #     year = str(e)
         
-        try:
-            if(type == 'MOVIE'):
-                rawData = item.find('div', class_='meta').text
-                listData = rawData.split()
-                duration = listData[1] + " " + listData[2]
-            else:
-                duration = 'N/A'
-        except Exception as e:
-            duration = str(e)
+        # try:
+        #     if(type == 'MOVIE'):
+        #         rawData = item.find('div', class_='meta').text
+        #         listData = rawData.split()
+        #         duration = listData[1] + " " + listData[2]
+        #     else:
+        #         duration = 'N/A'
+        # except Exception as e:
+        #     duration = str(e)
 
-        try:
-            if(type == 'TV'):
-                rawData = item.find('div', class_='meta').text
-                listData = rawData.split()
-                seasons = listData[1]
-            else:
-                seasons = 'N/A'
-        except Exception as e:
-            seasons = str(e)
+        # try:
+        #     if(type == 'TV'):
+        #         rawData = item.find('div', class_='meta').text
+        #         listData = rawData.split()
+        #         seasons = listData[1]
+        #     else:
+        #         seasons = 'N/A'
+        # except Exception as e:
+        #     seasons = str(e)
 
-        try:
-            if(type == 'TV'):
-                rawData = item.find('div', class_='meta').text
-                listData = rawData.split()
-                episodes = listData[-2]
-            else:
-                episodes = 'N/A'
-        except Exception as e:
-            episodes = str(e)
+        # try:
+        #     if(type == 'TV'):
+        #         rawData = item.find('div', class_='meta').text
+        #         listData = rawData.split()
+        #         episodes = listData[-2]
+        #     else:
+        #         episodes = 'N/A'
+        # except Exception as e:
+        #     episodes = str(e)
 
         moviesObject = {
             'link': link,

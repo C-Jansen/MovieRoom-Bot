@@ -112,8 +112,6 @@ async def list_movies(interaction: discord.Interaction):
         print(f'Listed movies for user {user_id}')
 
 
-
-
 class MovieView():
     def __init__(self, movies):
         super().__init__()

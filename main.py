@@ -137,26 +137,20 @@ async def search(interaction: discord.Interaction, query:str):
     try:
         user_id = str(interaction.user.id)
         results = getMovies(query)
-        await interaction.response.send_message("Searching movies...", ephemeral=True)
-        
-        # Assemble the images
         images = [Image.open(BytesIO(requests.get(movie['cover']).content)) for movie in results]
         combined_image = MovieView.combine_images(images)
+        view = discord.ui.View()
+        await interaction.response.send_message("Searching movies...", ephemeral=True)
+        
         with BytesIO() as image_binary:
             combined_image.save(image_binary, "JPEG")
             image_binary.seek(0)
             file = discord.File(fp=image_binary, filename='combined_image.jpg')
-        
-        # Create the embed with the search results
-        
-        view = discord.ui.View()
+         
         for result in results:
             view.add_item(discord.ui.Button(label='Go to ' + result['title'], url=make_room(result['link'])))
-        
-        # Send the embed with the assembled image and the search results
         await interaction.followup.send(file=file, view=view)
         
-
         print(f'search from {user_id}')
     except Exception as e:
         print(f'Error in search command: {e}')

@@ -1,8 +1,17 @@
 import requests
 from bs4 import BeautifulSoup
 
+postlimit = 2
 
-postlimit = 5
+def getSoup(url):
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        soup = BeautifulSoup(response.content, 'lxml')
+        return soup
+    except requests.exceptions.RequestException as e:
+        raise Exception(str(e))
+
 def getMovies(query):
     moviesDictionary = {
         'success': True,
@@ -11,17 +20,17 @@ def getMovies(query):
     }
     page = 1
     try:
-        if page != None:
+        if page is not None:
             base_url = f'https://fmoviesz.to/filter?keyword={query}&page={page}'
             currentPage = page
-            soup = BeautifulSoup(requests.get(base_url).content, 'lxml')
+            soup = getSoup(base_url)
         else:
             base_url = f'https://fmoviesz.to/filter?keyword={query}'
             currentPage = '1'
-            soup = BeautifulSoup(requests.get(base_url).content, 'lxml')
-    except requests.exceptions.RequestException as e:
-        moviesDictionary['success'] = False,
-        moviesDictionary['error'] = str(e),
+            soup = getSoup(base_url)
+    except Exception as e:
+        moviesDictionary['success'] = False
+        moviesDictionary['error'] = str(e)
         return moviesDictionary
 
     moviesDictionary['currentPage'] = currentPage
@@ -48,68 +57,53 @@ def getMovies(query):
         except Exception as e:
             cover = str(e)
         
-        # try:
-        #     quality = item.find('div', class_="quality").text
-        # except Exception as e:
-        #     quality = str(e)
+        try:
+            type = item.find('span', class_='type').text
+        except Exception as e:
+            type = str(e)
 
-
-        # try:
-        #     type = item.find('i', class_='type').text
-        # except Exception as e:
-        #     type = str(e)
-
-        # try:
-        #     if(type == 'MOVIE'):
-        #         rawData = item.find('div', class_='meta').text
-        #         listData = rawData.split()
-        #         year = listData[0]
-        #     else:
-        #         year = 'N/A'
-        # except Exception as e:
-        #     year = str(e)
+        try:
+            if type == 'MOVIE' or type.startswith('SS'):
+                rawData = item.find('div', class_='meta').text
+                listData = rawData.split()
+                year = listData[0]
+            else:
+                year = 'N/A'
+        except Exception as e:
+            year = str(e)
         
-        # try:
-        #     if(type == 'MOVIE'):
-        #         rawData = item.find('div', class_='meta').text
-        #         listData = rawData.split()
-        #         duration = listData[1] + " " + listData[2]
-        #     else:
-        #         duration = 'N/A'
-        # except Exception as e:
-        #     duration = str(e)
+        try:
+            if type == 'MOVIE':
+                rawData = item.find('div', class_='meta').text
+                listData = rawData.split()
+                duration = listData[-3] +" "+ listData[-2]
+            else:
+                duration = 'N/A'
+        except Exception as e:
+            duration = str(e)
 
-        # try:
-        #     if(type == 'TV'):
-        #         rawData = item.find('div', class_='meta').text
-        #         listData = rawData.split()
-        #         seasons = listData[1]
-        #     else:
-        #         seasons = 'N/A'
-        # except Exception as e:
-        #     seasons = str(e)
+        try:
+            if type.startswith('SS'):
+                rawData = item.find('div', class_='meta').text
+                listData = rawData.split()
+                episodes = listData[-2]
+            else:
+                episodes = 'N/A'
+        except Exception as e:
+            episodes = str(e)
 
-        # try:
-        #     if(type == 'TV'):
-        #         rawData = item.find('div', class_='meta').text
-        #         listData = rawData.split()
-        #         episodes = listData[-2]
-        #     else:
-        #         episodes = 'N/A'
-        # except Exception as e:
-        #     episodes = str(e)
+        
 
         moviesObject = {
             'link': link,
             'cover': cover,
+            'title': title,
+            'type': type,
+            'year': year,
             
-            
-            'title': title
-            
-            #'year': year,
-            #'duration': duration,
-            #'seasons': seasons,
-            #'episodes': episodes
+            'duration': duration,
+            'seasons': type,
+            'episodes': episodes
         }
         
         moviesDictionary['data'].append(moviesObject)
@@ -126,8 +120,8 @@ def getPages(soup, query):
         return pages
 
     for l in li:
-        a = l.find('a', text='»')
-    if a != None:
+        a = l.find('a', string='»')
+    if a is not None:
         href = a['href']
         hrefSplit = href.split('page=')
         pages = hrefSplit[1]

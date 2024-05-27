@@ -119,13 +119,8 @@ async def list_movies(interaction: discord.Interaction):
 class MovieView():
     def __init__(self, movies):
         super().__init__()
-        images = []
-        for movie in movies:
-            response = requests.get(movie['cover'])
-            img = Image.open(BytesIO(response.content))
-            images.append(img)
-            self.add_item(Button(label=movie['title'], url=movie['link']))
-        self.combined_image = self.combine_images(images)
+        self.images = [Image.open(BytesIO(requests.get(movie['cover']).content)) for movie in movies]
+        self.combined_image = self.combine_images(self.images)
 
     @staticmethod
     def combine_images(images):
@@ -135,7 +130,8 @@ class MovieView():
         new_img = Image.new('RGB', (total_width, max_height))
         x_offset = 0
         for img in images:
-            new_img.paste(img, (x_offset,0))
+            img = img.resize((img.width, max_height))
+            new_img.paste(img, (x_offset, 0))
             x_offset += img.width
         return new_img
 
@@ -144,7 +140,7 @@ async def search(interaction: discord.Interaction, query:str):
     try:
         user_id = str(interaction.user.id)
         results = getMovies(query)
-        await interaction.response.defer(ephemeral=True)
+        await interaction.response.send_message("Searching ...", ephemeral=True)
         
         images = [Image.open(BytesIO(requests.get(movie['cover']).content)) for movie in results]
         combined_image = MovieView.combine_images(images)

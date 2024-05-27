@@ -150,11 +150,14 @@ async def search(interaction: discord.Interaction, query:str):
             combined_image.save(image_binary, "JPEG")
             image_binary.seek(0)
             file=discord.File(fp=image_binary, filename='combined_image.jpg')
-       
+            embed = discord.Embed(title="Search Results", description=f"Here are the search results for '{query}':", color=discord.Color.green())
         for result in results:
-            view.add_item(discord.ui.Button(label= result['title'], url=make_room(result['link'])))
+            if result['type'] == 'MOVIE':
+                embed.add_field(name=result['title'] + " duration: " + result['duration'] + "year:  "+result['year'], value=f"[Room For {result['title']}]({make_room(result['link'])})", inline=False)
+            else:
+                embed.add_field(name=result['title'] + " " + result['type'] + "episodes: " +result['episodes'], value=f"[Room For {result['title']}]({make_room(result['link'])})", inline=False)
             
-        await interaction.followup.send(file=file, view=view)
+        await interaction.followup.send(file=file, embed=embed, view = view)
         
         print(f'search from {user_id}')
     except Exception as e:

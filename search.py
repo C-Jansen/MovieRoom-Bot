@@ -48,16 +48,16 @@ def getMovies(query):
         except Exception as e:
             cover = str(e)
         
-        try:
-            quality = item.find('div', class_="quality").text
-        except Exception as e:
-            quality = str(e)
+        # try:
+        #     quality = item.find('div', class_="quality").text
+        # except Exception as e:
+        #     quality = str(e)
 
 
-        try:
-            type = item.find('i', class_='type').text
-        except Exception as e:
-            type = str(e)
+        # try:
+        #     type = item.find('i', class_='type').text
+        # except Exception as e:
+        #     type = str(e)
 
         # try:
         #     if(type == 'MOVIE'):

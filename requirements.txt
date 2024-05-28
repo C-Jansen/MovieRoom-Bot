@@ -1,2 +1,4 @@
 discord.py
 discord-interactions
+Pillow
+python-dotenv

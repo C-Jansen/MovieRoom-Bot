@@ -11,29 +11,31 @@ def getSoup(url):
         return soup
     except requests.exceptions.RequestException as e:
         raise Exception(str(e))
-
-def getMovies(query):
-    moviesDictionary = {
-        'success': True,
-        'query': query,
-        'data': [],
-    }
-    page = 1
+    
+def searchMovies(query, page=None):
     try:
         if page is not None:
             base_url = f'https://fmoviesz.to/filter?keyword={query}&page={page}'
             currentPage = page
-            soup = getSoup(base_url)
         else:
             base_url = f'https://fmoviesz.to/filter?keyword={query}'
             currentPage = '1'
-            soup = getSoup(base_url)
+        soup = getSoup(base_url)
     except Exception as e:
-        moviesDictionary['success'] = False
-        moviesDictionary['error'] = str(e)
+        moviesDictionary = {
+            'success': False,
+            'query': query,
+            'error': str(e),
+            'data': [],
+        }
         return moviesDictionary
 
-    moviesDictionary['currentPage'] = currentPage
+    moviesDictionary = {
+        'success': True,
+        'query': query,
+        'currentPage': currentPage,
+        'data': [],
+    }
 
     items = soup.find_all('div', class_='item')
 
@@ -92,21 +94,19 @@ def getMovies(query):
         except Exception as e:
             episodes = str(e)
 
-        
-
         moviesObject = {
             'link': link,
             'cover': cover,
             'title': title,
             'type': type,
             'year': year,
-            
             'duration': duration,
             'seasons': type,
             'episodes': episodes
         }
         
         moviesDictionary['data'].append(moviesObject)
+    
     moviesDictionary['totalPages'] = getPages(soup, query)
 
     return moviesDictionary['data'][:postlimit]

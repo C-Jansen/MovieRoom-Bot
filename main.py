@@ -135,7 +135,7 @@ class MovieView():
             x_offset += img.width
         return new_img
 
-@bot.tree.command(name='search', description='search for movies')
+@bot.tree.command(name='search', description='search for movies & make Watch2gether room')
 async def search(interaction: discord.Interaction, query:str):
     try:
         user_id = str(interaction.user.id)

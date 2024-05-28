@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 
-postlimit = 2
+postlimit = 5
 
 def getSoup(url):
     try:
@@ -76,7 +76,7 @@ def getMovies(query):
             if type == 'MOVIE':
                 rawData = item.find('div', class_='meta').text
                 listData = rawData.split()
-                duration = listData[-3] +" "+ listData[-2]
+                duration = listData[2]
             else:
                 duration = 'N/A'
         except Exception as e:

@@ -151,17 +151,28 @@ async def search(interaction: discord.Interaction, query:str):
             image_binary.seek(0)
             file=discord.File(fp=image_binary, filename='combined_image.jpg')
             embed = discord.Embed(title="Search Results", description=f"Here are the search results for '{query}':", color=discord.Color.green())
+            embed.add_field(name="user", value=f"{interaction.user.mention}", inline=False)
         for result in results:
             if result['type'] == 'MOVIE':
-                embed.add_field(name=result['title'] + " duration: " + result['duration'] + "year:  "+result['year'], value=f"[Room For {result['title']}]({make_room(result['link'])})", inline=False)
+                embed.add_field(
+                    name=result['title'] + " ( '"+ result['type'] + "' duration: " + result['duration'] + " min / year:  "+result['year']+" )",
+                    value=f"[Room for {result['title']}]({make_room(result['link'])})" + " | " + f"[Direct link for {result['title']}]({result['link']})",
+                    inline=False
+                )
             else:
-                embed.add_field(name=result['title'] + " " + result['type'] + "episodes: " +result['episodes'], value=f"[Room For {result['title']}]({make_room(result['link'])})", inline=False)
-            
+                embed.add_field(
+                    name=result['title'] + " ( seasons: " + result['type'] + " / episodes: " +result['episodes']+" )",
+                    value=f"[Room for {result['title']}]({make_room(result['link'])})" + " | " + f"[Direct link for {result['title']}]({result['link']})",
+                    inline=False
+                )
         await interaction.followup.send(file=file, embed=embed, view = view)
         
         print(f'search from {user_id}')
     except Exception as e:
+        embed = discord.Embed(title="Not found", description=f"'{query}' not found; verify the name", color=discord.Color.red())
         print(f'Error in search command: {e}')
+        await interaction.followup.send(embed=embed)
+
 
 if DISCORD_TOKEN:
     bot.run(DISCORD_TOKEN)

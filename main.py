@@ -1,8 +1,8 @@
 import os
-import json
+
 import requests
 import sqlite3
-import asyncio
+
 
 from PIL import Image
 from io import BytesIO
@@ -12,9 +12,9 @@ from dotenv import load_dotenv
 import discord
 from discord.ext import commands
 from discord import app_commands
-from discord.ui import Button, View
 
-from search import getMovies
+
+from search import searchMovies
 from makeRoom import make_room
 
 
@@ -22,16 +22,15 @@ load_dotenv('envBot.env')
 DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
 W2G_API_KEY = os.getenv('W2G_API_KEY')
 
-
 conn = sqlite3.connect('movies.db')
 c = conn.cursor()
-
 
 c.execute('''CREATE TABLE IF NOT EXISTS movies (
                 guild_id TEXT NOT NULL,
                 user_id TEXT,
                 movie_name TEXT,
-                date_added TEXT
+                date_added TEXT,
+                media_type TEXT
             )''')
 conn.commit()
 
@@ -56,24 +55,28 @@ bot = MyBot()
 @bot.tree.command(name='help', description='Show the help message' )
 async def help(interaction: discord.Interaction):
     embed = discord.Embed(title="Help", description="Here are the available commands:", color=discord.Color.green())
-    embed.add_field(name="/addmovie", value="Add a movie to your plan to watch list", inline=False)
-    embed.add_field(name="/deletemovie", value="Delete a movie from your plan to watch list", inline=False)
+    embed.add_field(name="/addmovie <media_type: tv/movie> <movie_name: name>", value="Add a movie to your plan to watch list", inline=False)
+    embed.add_field(name="/deletemovie <movie_name: name>", value="Delete a movie from your plan to watch list", inline=False)
     embed.add_field(name="/clearmovies", value="Clear your plan to watch list", inline=False)
     embed.add_field(name="/listmovies", value="List all movies in your plan to watch list", inline=False)
-    embed.add_field(name="/search", value="Search for movies & Make Watch2gether room", inline=False)
+    embed.add_field(name="/search <movie_name: name>", value="Search for movies & Make Watch2gether room", inline=False)
     await interaction.response.send_message(embed=embed)
 
 @bot.tree.command(name='addmovie', description='Add a movie to your plan to watch list')
-async def add_movie(interaction: discord.Interaction, movie_name: str):
+async def add_movie(interaction: discord.Interaction, media_type: str, movie_name: str):
+    if media_type.lower() not in ['tv', 'movie']:
+        await interaction.response.send_message('Invalid media type. Please choose either "tv" or "movie".')
+        return
+
     user_id = str(interaction.user.id)
     date_added = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     guild_id = str(interaction.guild.id)  
-    c.execute("INSERT INTO movies (guild_id, user_id, movie_name, date_added) VALUES (?, ?, ?, ?)", (guild_id, user_id, movie_name, date_added))  # Add guild_id parameter
+    c.execute("INSERT INTO movies (guild_id, user_id, movie_name, date_added, media_type) VALUES (?, ?, ?, ?, ?)", (guild_id, user_id, movie_name, date_added, media_type))  # Add guild_id and media_type parameters
     conn.commit()
-    embed = discord.Embed(title="Movie Added", description=f'"{movie_name}" has been added to your plan to watch list!', color=discord.Color.blue())
+    embed = discord.Embed(title="Movie Added", description=f'"{movie_name}" ({media_type}) has been added to your plan to watch list!', color=discord.Color.blue())
     await interaction.response.send_message(embed=embed)
-    print(f'Added "{movie_name}" to user {user_id} list')
+    print(f'Added "{movie_name}" ({media_type}) to user {user_id} list')
 
 @bot.tree.command(name='deletemovie', description='Delete a movie from your plan to watch list')
 async def delete_movie(interaction: discord.Interaction, movie_name: str):
@@ -139,7 +142,7 @@ class MovieView():
 async def search(interaction: discord.Interaction, query:str):
     try:
         user_id = str(interaction.user.id)
-        results = getMovies(query)
+        results = searchMovies(query)
         await interaction.response.send_message("Searching ...", ephemeral=True)
         
         images = [Image.open(BytesIO(requests.get(movie['cover']).content)) for movie in results]
@@ -156,13 +159,13 @@ async def search(interaction: discord.Interaction, query:str):
             if result['type'] == 'MOVIE':
                 embed.add_field(
                     name=result['title'] + " ( '"+ result['type'] + "' duration: " + result['duration'] + " min / year:  "+result['year']+" )",
-                    value=f"[Room for {result['title']}]({make_room(result['link'])})" + " | " + f"[Direct link for {result['title']}]({result['link']})",
+                    value=f"[{'Room'}]({make_room(result['link'])})" + " | " + f"[{'Direct link'}]({result['link']})",
                     inline=False
                 )
             else:
                 embed.add_field(
                     name=result['title'] + " ( seasons: " + result['type'] + " / episodes: " +result['episodes']+" )",
-                    value=f"[Room for {result['title']}]({make_room(result['link'])})" + " | " + f"[Direct link for {result['title']}]({result['link']})",
+                    value=f"[{'Room'}]({make_room(result['link'])})" + " | " + f"[{'Direct link'}]({result['link']})",
                     inline=False
                 )
         await interaction.followup.send(file=file, embed=embed, view = view)
@@ -170,11 +173,11 @@ async def search(interaction: discord.Interaction, query:str):
         print(f'search from {user_id}')
     except Exception as e:
         embed = discord.Embed(title="Not found", description=f"'{query}' not found; verify the name", color=discord.Color.red())
-        print(f'Error in search command: {e}')
+        print(f'this Error in search command: {e}')
         await interaction.followup.send(embed=embed)
 
 
 if DISCORD_TOKEN:
     bot.run(DISCORD_TOKEN)
 else:
-    print("No Discord token provided. Please set the DISCORD_TOKEN environment variable.")
+    print("No Discord token")

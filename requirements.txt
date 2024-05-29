@@ -1,4 +1,7 @@
 discord.py
 discord-interactions
+requests
 Pillow
-python-dotenv
+beautifulsoup4
+flask
+lxml

@@ -12,7 +12,7 @@ def getSoup(url):
     except requests.exceptions.RequestException as e:
         raise Exception(str(e))
     
-def searchMovies(query, page=None):
+def searchMovies(query, ss, ep, page=None):
     try:
         if page is not None:
             base_url = f'https://fmoviesz.to/filter?keyword={query}&page={page}'
@@ -43,7 +43,7 @@ def searchMovies(query, page=None):
         try:
             a = item.find('a')
             href = a.get('href')
-            link = f'https://fmoviesz.to{href}/1-1'
+            link = f'https://fmoviesz.to{href}/{ss}-{ep}'
         except Exception as e:
             link = str(e)
 

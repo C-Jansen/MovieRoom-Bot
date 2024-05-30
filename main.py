@@ -62,7 +62,7 @@ async def help(interaction: discord.Interaction):
     embed.add_field(name="/search <movie_name: name>", value="Search for movies & Make Watch2gether room", inline=False)
     await interaction.response.send_message(embed=embed)
 
-@bot.tree.command(name='addmovie', description='Add a movie to your plan to watch list')
+@bot.tree.command(name='add', description='Add a movie or tv Show to your plan to watch list')
 async def add_movie(interaction: discord.Interaction, media_type: str, movie_name: str):
     if media_type.lower() not in ['tv', 'movie']:
         await interaction.response.send_message('Invalid media type. Please choose either "tv" or "movie".')
@@ -74,25 +74,25 @@ async def add_movie(interaction: discord.Interaction, media_type: str, movie_nam
     guild_id = str(interaction.guild.id)  
     c.execute("INSERT INTO movies (guild_id, user_id, movie_name, date_added, media_type) VALUES (?, ?, ?, ?, ?)", (guild_id, user_id, movie_name, date_added, media_type))  # Add guild_id and media_type parameters
     conn.commit()
-    embed = discord.Embed(title="Movie Added", description=f'"{movie_name}" ({media_type}) has been added to your plan to watch list!', color=discord.Color.blue())
+    embed = discord.Embed(title="Added successfully", description=f'"{movie_name}" ({media_type}) has been added to your plan to watch list!', color=discord.Color.blue())
     await interaction.response.send_message(embed=embed)
     print(f'Added "{movie_name}" ({media_type}) to user {user_id} list')
 
-@bot.tree.command(name='deletemovie', description='Delete a movie from your plan to watch list')
+@bot.tree.command(name='delete', description='Delete a movie or tv show from your plan to watch list')
 async def delete_movie(interaction: discord.Interaction, movie_name: str):
     user_id = str(interaction.user.id)
     guild_id = str(interaction.guild.id)
     c.execute("DELETE FROM movies WHERE user_id = ? AND movie_name = ? AND guild_id = ?", (user_id, movie_name,guild_id))
     conn.commit()
     if c.rowcount > 0:
-        embed = discord.Embed(title="Movie Removed", description=f'"{movie_name}" has been removed from your plan to watch list!', color=discord.Color.orange())
+        embed = discord.Embed(title="Removed successfully", description=f'"{movie_name}" has been removed from your plan to watch list!', color=discord.Color.orange())
         await interaction.response.send_message(embed=embed)
         print(f'Removed "{movie_name}" from user {user_id} list')
     else:
         embed = discord.Embed(title="Not Found", description=f'"{movie_name}" is not in your plan to watch list!', color=discord.Color.red())
         await interaction.response.send_message(embed=embed)
 
-@bot.tree.command(name='clearmovies', description='Clear your plan to watch list')
+@bot.tree.command(name='clearlist', description='Clear your plan to watch list')
 async def clear_movies(interaction: discord.Interaction):
     user_id = str(interaction.user.id)
     guild_id = str(interaction.guild.id)
@@ -102,14 +102,14 @@ async def clear_movies(interaction: discord.Interaction):
     await interaction.response.send_message(embed=embed)
     print(f'Cleared list for user {user_id}')
 
-@bot.tree.command(name='listmovies', description='List all movies in your plan to watch list')
+@bot.tree.command(name='list', description='List all movies or tv show in your plan to watch list')
 async def list_movies(interaction: discord.Interaction):
     user_id = str(interaction.user.id)
     guild_id = str(interaction.guild.id)
     c.execute("SELECT movie_name, date_added FROM movies WHERE user_id = ? AND guild_id = ?", (user_id,guild_id))
     movies = c.fetchall()
     if not movies:
-        embed = discord.Embed(title="No Movies", description='Your plan to watch list is empty!', color=discord.Color.red())
+        embed = discord.Embed(title="Ba7", description='Your plan to watch list is empty!', color=discord.Color.red())
         await interaction.response.send_message(embed=embed)
         print(f'User {user_id} list is empty')
     else:
@@ -139,10 +139,12 @@ class MovieView():
         return new_img
 
 @bot.tree.command(name='search', description='search for movies & make Watch2gether room')
-async def search(interaction: discord.Interaction, query:str):
+async def search(interaction: discord.Interaction, query: str, ss: str = "1", ep: str = "1"):
     try:
         user_id = str(interaction.user.id)
-        results = searchMovies(query)
+        ss = ss if ss else "1"  
+        ep = ep if ep else "1"  
+        results = searchMovies(query, ss, ep)
         await interaction.response.send_message("Searching ...", ephemeral=True)
         
         images = [Image.open(BytesIO(requests.get(movie['cover']).content)) for movie in results]
@@ -168,7 +170,7 @@ async def search(interaction: discord.Interaction, query:str):
                     value=f"[{'Room'}]({make_room(result['link'])})" + " | " + f"[{'Direct link'}]({result['link']})",
                     inline=False
                 )
-        await interaction.followup.send(file=file, embed=embed, view = view)
+        await interaction.followup.send(file= file, embed= embed, view= view)
         
         print(f'search from {user_id}')
     except Exception as e:

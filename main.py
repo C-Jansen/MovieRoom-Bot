@@ -7,7 +7,7 @@ import sqlite3
 from PIL import Image
 from io import BytesIO
 from datetime import datetime
-from dotenv import load_dotenv
+#from dotenv import load_dotenv
 
 import discord
 from discord.ext import commands
@@ -20,7 +20,7 @@ from keep_it_alive import keep_alive
 
 
 
-load_dotenv('envBot.env')
+#load_dotenv('envBot.env')
 DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
 W2G_API_KEY = os.getenv('W2G_API_KEY')
 

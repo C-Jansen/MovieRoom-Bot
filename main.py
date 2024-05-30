@@ -18,7 +18,6 @@ from search import searchMovies
 from makeRoom import make_room
 from keep_it_alive import keep_alive
 
-
 #load_dotenv('envBot.env')
 DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
 W2G_API_KEY = os.getenv('W2G_API_KEY')
@@ -175,8 +174,8 @@ async def search(interaction: discord.Interaction, query: str, ss: str = "1", ep
         
         print(f'search from {user_id}')
     except Exception as e:
-        embed = discord.Embed(title="Not found", description=f"'{query}' not found; verify the name{e}", color=discord.Color.red())
-        print(f'this Error in search command: {e}')
+        embed = discord.Embed(title="Not found", description=f"'{query}' not found; verify the name{str(e)}", color=discord.Color.red())
+        print(f'this Error in search command: {str(e)}')
         await interaction.followup.send(embed=embed)
 
 

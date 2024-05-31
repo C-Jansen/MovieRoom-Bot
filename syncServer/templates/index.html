@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Watch Together</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #000;
+        }
+        video {
+            width: 80%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <video id="video" controls>
+        <source src="https://vid41c.site/e/0DY8069G6PR4?t=4xjRD%2FIgDFEMyQ%3D%3D&sub.info=https%3A%2F%2Ffmoviesz.to%2Fajax%2Fepisode%2Fsubtitles%2F360796&autostart=true" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+    <script>
+        var socket = io();
+        var video = document.getElementById('video');
+
+        video.addEventListener('play', function() {
+            socket.emit('play', video.currentTime);
+        });
+
+        video.addEventListener('pause', function() {
+            socket.emit('pause', video.currentTime);
+        });
+
+        socket.on('play', function(time) {
+            video.currentTime = time;
+            video.play();
+        });
+
+        socket.on('pause', function(time) {
+            video.currentTime = time;
+            video.pause();
+        });
+    </script>
+</body>
+</html>

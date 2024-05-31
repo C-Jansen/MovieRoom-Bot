@@ -12,7 +12,7 @@ def getSoup(url):
     except requests.exceptions.RequestException as e:
         raise Exception(str(e))
     
-def searchMovies(query, ss, ep, page=None):
+def searchMovies(query, ss="1", ep="1", page=None):
     try:
         if page is not None:
             base_url = f'https://fmoviesz.to/filter?keyword={query}&page={page}'

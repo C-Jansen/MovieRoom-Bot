@@ -16,7 +16,7 @@ from discord import app_commands
 
 from search import searchMovies
 from makeRoom import make_room
-from keep_it_alive import keep_alive
+#from keep_it_alive import keep_alive
 
 
 #load_dotenv('envBot.env')

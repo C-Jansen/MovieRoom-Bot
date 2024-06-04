@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 
 postlimit = 5
+main_url='fmovies24.to'
 
 def getSoup(url):
     try:
@@ -15,10 +16,10 @@ def getSoup(url):
 def searchMovies(query, ss="1", ep="1", page=None):
     try:
         if page is not None:
-            base_url = f'https://fmoviesz.to/filter?keyword={query}&page={page}'
+            base_url = f'https://{main_url}/filter?keyword={query}&page={page}'
             currentPage = page
         else:
-            base_url = f'https://fmoviesz.to/filter?keyword={query}'
+            base_url = f'https://{main_url}/filter?keyword={query}'
             currentPage = '1'
         soup = getSoup(base_url)
     except Exception as e:
@@ -43,7 +44,7 @@ def searchMovies(query, ss="1", ep="1", page=None):
         try:
             a = item.find('a')
             href = a.get('href')
-            link = f'https://fmoviesz.to{href}/{ss}-{ep}'
+            link = f'https://{main_url}{href}/{ss}-{ep}'
         except Exception as e:
             link = str(e)
 

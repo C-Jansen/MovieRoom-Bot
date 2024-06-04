@@ -19,7 +19,7 @@ from makeRoom import make_room
 #from keep_it_alive import keep_alive
 
 
-load_dotenv()
+load_dotenv('.env')
 DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
 W2G_API_KEY = os.getenv('W2G_API_KEY')
 
@@ -56,10 +56,10 @@ bot = MyBot()
 @bot.tree.command(name='help', description='Show the help message' )
 async def help(interaction: discord.Interaction):
     embed = discord.Embed(title="Help", description="Here are the available commands:", color=discord.Color.green())
-    embed.add_field(name="/addmovie <media_type: tv/movie> <movie_name: name>", value="Add a movie to your plan to watch list", inline=False)
-    embed.add_field(name="/deletemovie <movie_name: name>", value="Delete a movie from your plan to watch list", inline=False)
-    embed.add_field(name="/clearmovies", value="Clear your plan to watch list", inline=False)
-    embed.add_field(name="/listmovies", value="List all movies in your plan to watch list", inline=False)
+    embed.add_field(name="/add <media_type: tv/movie> <movie_name: name>", value="Add a movie to your plan to watch list", inline=False)
+    embed.add_field(name="/delete <movie_name: name>", value="Delete a movie from your plan to watch list", inline=False)
+    embed.add_field(name="/clear", value="Clear your plan to watch list", inline=False)
+    embed.add_field(name="/list", value="List all movies in your plan to watch list", inline=False)
     embed.add_field(name="/search <movie_name: name>", value="Search for movies & Make Watch2gether room", inline=False)
     await interaction.response.send_message(embed=embed)
 
@@ -140,12 +140,12 @@ class MovieView():
         return new_img
 
 @bot.tree.command(name='search', description='search for movies & make Watch2gether room')
-async def search(interaction: discord.Interaction, query: str, ss: str = "1", ep: str = "1"):
+async def search(interaction: discord.Interaction, query: str, season: str = "1", episode: str = "1"):
     try:
         user_id = str(interaction.user.id)
         ss = ss if ss else "1"  
         ep = ep if ep else "1"  
-        results = searchMovies(query, ss, ep)
+        results = searchMovies(query, season, episode)
         await interaction.response.send_message("Searching ...", ephemeral=True)
         
         images = [Image.open(BytesIO(requests.get(movie['cover']).content)) for movie in results]

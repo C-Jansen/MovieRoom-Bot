@@ -3,16 +3,17 @@ from bs4 import BeautifulSoup
 
 postlimit = 5
 main_url='fmovies24.to'
-
 def getSoup(url):
     try:
-        response = requests.get(url)
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36'
+        }
+        response = requests.get(url, headers=headers)
         response.raise_for_status()
         soup = BeautifulSoup(response.content, 'lxml')
         return soup
     except requests.exceptions.RequestException as e:
         raise Exception(str(e))
-    
 def searchMovies(query, ss="1", ep="1", page=None):
     try:
         if page is not None:

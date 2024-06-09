@@ -3,7 +3,6 @@ import os
 import requests
 import sqlite3
 
-
 from PIL import Image
 from io import BytesIO
 from datetime import datetime
@@ -12,7 +11,6 @@ from dotenv import load_dotenv
 import discord
 from discord.ext import commands
 from discord import app_commands
-
 
 from search import searchMovies
 from makeRoom import make_room
@@ -143,8 +141,8 @@ class MovieView():
 async def search(interaction: discord.Interaction, query: str, season: str = "1", episode: str = "1"):
     try:
         user_id = str(interaction.user.id)
-        ss = ss if ss else "1"  
-        ep = ep if ep else "1"  
+        season = season if season else "1"  
+        episode = episode if episode else "1"  
         results = searchMovies(query, season, episode)
         await interaction.response.send_message("Searching ...", ephemeral=True)
         

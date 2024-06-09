@@ -17,7 +17,7 @@ from makeRoom import make_room
 #from keep_it_alive import keep_alive
 
 
-load_dotenv('.env')
+#load_dotenv('.env')
 DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
 W2G_API_KEY = os.getenv('W2G_API_KEY')
 
